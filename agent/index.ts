@@ -26,6 +26,7 @@ function offlinePatch() {
 
     log("Successfully hooked UnUtil.isLocked()");
 
+    // TODO: We probably wanna patch out the leaderboard menus altogether at some point
     log("Hooking Leaderboard.makeGetRequest and Leaderboard.postScore...");
     const leaderboardCtor = Leaderboard.$init.overload(
         'java.lang.String',
@@ -59,56 +60,22 @@ function offlinePatch() {
     };
 }
 
-function enableDebugMode() {
-    // Enable debug mode
-    log("Enabling debug mode...");
-
-    const debugClass = "com.tann.dice.gameplay.mode.debuggy.DebugMode";
-    const DebugMode = Java.use(debugClass);
-
-    log(`DebugMode class: ${debugClass}`);
-
-    const debugModeCtor = DebugMode.$init.overload();
-    DebugMode.$init.overload().implementation = function () {
-        log("DebugMode instance created: " + this);
-        return debugModeCtor.call(this);
-    }
-
-    // Hook the DebugMode.isPlayable method to always return true
-    DebugMode.isPlayable.implementation = function () {
-        log("DebugMode.isPlayable called, returning true");
-        return true;
-    };
-}
-
-function startCustomMode() {
+function setupCustomMode() {
     const DemoMode = Java.use("com.tann.dice.gameplay.mode.general.DemoMode");
     const DebugConfig = Java.use("com.tann.dice.gameplay.context.config.misc.DebugConfig");
     const Arrays = Java.use("java.util.Arrays");
     const StandardButton = Java.use("com.tann.dice.util.ui.standardButton.StandardButton");
     const Runnable = Java.use("java.lang.Runnable");
 
+    // Hook the makeStartButton method to create a custom mode start button
     DebugConfig.makeStartButton.implementation = function (z) {
         log("makeStartButton() hooked for DebugConfig");
-        const btn = StandardButton.$new.overload('java.lang.String').call(StandardButton, "[green]Start thing lol");
-
-        const MyRunnable = Java.registerClass({
-            name: "com.example.MyRunnable",
-            implements: [Runnable],
-            methods: {
-                run: function () {
-                    log("Debug start button pressed (noop)");
-                }
-            }
-        });
-
-        btn.setRunnable(MyRunnable.$new());
-        return btn;
+        return StandardButton.$new.overload('java.lang.String').call(StandardButton, "[green]Custom Mode");
     };
 
     DemoMode.makeAllConfigs.implementation = function () {
         log("Overriding DemoMode config with DebugConfig");
-        const dbgConfig = DebugConfig.$new(); // Create DebugConfig instance
+        const dbgConfig = DebugConfig.$new(); // Create DebugConfig instance (as dummy)
 
         // Create a Java array of ContextConfig (superclass of DebugConfig)
         const ContextConfigArray = Java.array('com.tann.dice.gameplay.context.config.ContextConfig', [dbgConfig]);
@@ -118,7 +85,5 @@ function startCustomMode() {
 
 Java.perform(() => {
     offlinePatch();
-    enableDebugMode();
-
-    startCustomMode();
+    setupCustomMode();
 });
