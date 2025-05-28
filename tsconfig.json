@@ -11,6 +11,8 @@
     "moduleResolution": "node",
     "types": [
       "frida-gum"
-    ]
+    ],
+    "rootDir": "agent/",
+    "outDir": "dist"
   }
 }

@@ -1,19 +1,5 @@
-### How to compile & load
-
-```sh
-$ git clone git://github.com/oleavr/frida-agent-example.git
-$ cd frida-agent-example/
-$ npm install
-$ frida -U -f com.example.android --no-pause -l _agent.js
-```
-
-### Development workflow
-
-To continuously recompile on change, keep this running in a terminal:
-
-```sh
-$ npm run watch
-```
-
-And use an editor like Visual Studio Code for code completion and instant
-type-checking feedback.
+## slicendice-frida
+1. su location on bluestacks: `/boot/android/android/system/xbin/bstk/su`
+2. place frida-server in `/data/local/tmp` dir and run it (v16, 17 was a mess to configure)
+3. attach with `frida -U -p <pid> -l ./_agent.js`, or spawn com.com.tann.dice (not sure why the actual package name is com.com)
+4. `adb shell am clear-debug-app` to unfuck adb - https://stackoverflow.com/a/56541740
