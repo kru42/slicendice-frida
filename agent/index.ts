@@ -1,5 +1,5 @@
 import { log } from "./logger.js";
-import { overrideConstructor, overrideMethod } from "./overrides";
+import { overrideConstructor, overrideMethod } from "./utils.js";
 import {
     offlinePatch,
     setupGameplayHooks,
@@ -8,7 +8,8 @@ import {
     setupGraphDrawingHooks,
     showPopup,
     drawTextBox
-} from "./game-hooks";
+} from "./game-hooks.js";
+import { setupAutobattleHooks } from './autobattle.js';
 
 let mainInstance = null;
 
@@ -35,6 +36,7 @@ Java.perform(() => {
             //setupCustomMode();
             setupGameplayHooks();
             setupGraphDrawingHooks();
+            setupAutobattleHooks();
         });
 
         return result;

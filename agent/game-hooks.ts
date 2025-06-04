@@ -1,25 +1,14 @@
-import { log } from "./logger"
-import { overrideConstructor, overrideMethod } from "./overrides";
-import { mainInstance } from "./index";
+import { log } from "./logger.js"
+import { overrideConstructor, overrideMethod } from "./utils.js";
+import { mainInstance } from "./index.js";
 
 function offlinePatch() {
     log("Disabling leaderboard and unlocking all game modes...");
 
-    const UnUtil = Java.use("com.tann.dice.gameplay.progress.chievo.unlock.UnUtil");
     const Leaderboard = Java.use("com.tann.dice.gameplay.leaderboard.Leaderboard");
+    const Settings = Java.use("com.tann.dice.gameplay.save.settings.Settings");
 
-    log("UnUtil class: com.tann.dice.gameplay.progress.chievo.unlock.UnUtil");
     log("Leaderboard class: com.tann.dice.gameplay.leaderboard.Leaderboard");
-
-    overrideConstructor(UnUtil, [], function (ctor) {
-        log("UnUtil instance created: " + this);
-        return ctor.call(this);
-    });
-
-    UnUtil.isLocked.implementation = function () {
-        return false;
-    };
-    log("Successfully hooked UnUtil.isLocked()");
 
     const leaderboardSig = [
         'java.lang.String',
@@ -44,6 +33,13 @@ function offlinePatch() {
         log("Leaderboard.postScore called");
         return;
     };
+
+    log("Successfully hooked Leaderboard")
+
+    overrideMethod(Settings, "isPurchased", [], function () {
+        log("Settings.isPurchased called, returning true to unlock all modes");
+        return true;
+    });
 }
 
 function setupGameplayHooks() {
